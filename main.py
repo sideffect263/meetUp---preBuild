@@ -20,7 +20,7 @@ async def root():
 
 from pymongo.mongo_client import MongoClient
 
-uri = "mongodb+srv://admin:asdfqwer1234@map.xkbb8us.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb+srv://:@map.xkbb8us.mongodb.net/?retryWrites=true&w=majority"
 
 # Create a new client and connect to the server
 client = MongoClient(uri)
