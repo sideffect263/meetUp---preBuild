@@ -1,7 +1,72 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, {useRef, useEffect, useState} from 'react';
+import { Link, useNavigation, router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // i want to present the user data on this page
 const UserProfile = () => {
+    const mapNavigation = useNavigation();
+
+
+    const logout = () => {
+        console.log("logout");
+
+
+    }
+
+
+    const deleteToken = async () => {
+        console.log("delete token");
+        
+        try {
+            await AsyncStorage.removeItem('meetUpToken');
+            router.replace('./Login');
+        } catch (error) {
+            // Error saving data
+            console.log(error);
+        }
+    }
+
+
+
+
+    useEffect(() => {
+      
+
+        mapNavigation.setOptions({
+  
+          header : () => (
+            <View style={styles.headerButtons}> 
+             <Link href="/UserProfile" style={[styles.profileButton, styles.highlightedButton]}>
+              <View style={styles.profileButtonImg}>
+              <Image source={require('../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
+              </View>
+              </Link>
+           
+              <Link href="/" style={[styles.profileButton]}>
+              <Image source={require('../assets/icons/map_icon.png')} style={styles.highButtonImg}/>
+              </Link>
+             
+             <Link  href={{
+                pathname: "/components/ContactsPage",
+                params: {data: "sms"}
+             }} style={styles.profileButton}>
+              <View style={styles.profileButtonImg}>
+              <Image source={require('../assets/icons/conversation_icon.png')} style={styles.highButtonImg}/>
+              </View>
+              </Link>
+            </View>
+          ),
+
+          
+        Animation: 'slide_from_left',
+
+        });
+      }
+      , []);
+  
+
+      
   return (
     <View style={styles.container}>
         <View style={styles.profileImage}>
@@ -25,12 +90,13 @@ const UserProfile = () => {
                     <Text style={styles.text}>Edit profile</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}>
-                    <Text style={styles.text}>Share profile</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
                     <Text style={styles.text}>Setting</Text>
                 </TouchableOpacity>
-            </View>
+            
+                <TouchableOpacity onPress={deleteToken} style={styles.button}>
+                    <Text style={styles.text}>log out</Text>
+                </TouchableOpacity>
+                          </View>
 
 
         </View>
@@ -40,6 +106,7 @@ const UserProfile = () => {
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 140,
         flex: 1,
         backgroundColor: '#fff',
         margin:'3%',
@@ -136,6 +203,75 @@ const styles = StyleSheet.create({
         color: '#000',
         fontSize: 24,
     },
+    highButtonImg:{
+        padding: 10,
+        
+        resizeMode: 'contain',
+        height: 50,
+        width: 50,
+        borderWidth: 2,
+        borderColor: "transparent",
+        display: 'flex',
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 100,
+        backgroundColor: 'white',
+    
+      },
+    
+      highlightedButton:{
+        borderWidth: 2,
+        borderColor: "lightgreen",
+        shadowColor: 'gray',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.9,
+        shadowRadius: 7,
+    
+      },
+      
+  profileButton:{
+    flex: 1,
+    height: 50,
+    maxWidth: 50,
+    marginHorizontal: 0,
+    width: '100%',
+    borderWidth: 0,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    
+    
+  },
+
+  profileButtonImg:{
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    
+  },
+
+  
+  headerButtons:{
+    backgroundColor: 'white',
+    position: 'absolute',
+    width: '100%',
+    height: 80,
+    top: 40,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    alignContent: 'center',
+    flexDirection: 'row',
+
+  },
+
+
+    
 
     
     });

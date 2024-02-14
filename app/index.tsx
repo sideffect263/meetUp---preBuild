@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState, useContext} from 'react';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { StyleSheet, View, TouchableOpacity, Text, Image, Dimensions } from 'react-native';
 import { useNavigation } from 'expo-router';
@@ -7,6 +7,40 @@ import { Link } from 'expo-router';
 import {StatusBar} from 'react-native'
 import * as Location from 'expo-location';
 import NewActModal from './components/NewActModal';
+import ActivitiesModal from './components/ActivitiesModal';
+import axios, { AxiosResponse } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import UserSignModal from './components/UserSignModal';
+import UserContextComponent  from './context/UserContextComponent';
+
+
+
+
+
+const storeData = async (token: string) => {
+  console.log("store token");
+  
+  console.log(token);
+  try {
+    await AsyncStorage.setItem('meetUpToken', token);
+  } catch (error) {
+    // Error saving data
+    console.log(error);
+  }
+}
+
+
+const deleteData = async(tokenName: string)=>{
+  console.log("delete")
+  try{
+    await AsyncStorage.removeItem(tokenName)
+  } catch(error){
+    console.log(error);
+  }
+}
+
+
+
 
 
 
@@ -209,21 +243,121 @@ let initialRegion = {
     longitudeDelta: 0.0421,
     };
 
+
+    const deviceWidth = Dimensions.get('window').width;
+
     const deviceHeight = Dimensions.get('window').height;
 
 
-export default function Index(navigation: any) {
-
-  const deviceWidth = Dimensions.get('window').width;
+ 
+    const miniLocationsStart = [
+      {
+        Index:1,
+        latlng: {
+          latitude: 32.0489241225874,
+          longitude: 34.75486787299215,
+        },
+        title: "title1",
+        description: "description",
+      },
   
+      {
+        Index:2,
+        latlng: {
+          latitude: 32.02893207647942,
+          longitude: 34.754867902254205,
+        },
+        title: "title2",
+        description: "description",
+      },
+    ]
+    
+
+
+export default function Index(this: any, navigation: any) {
+
+  const [token, setToken] = useState<any>(null)
+  const [miniLocations, setMiniLocations] = useState<Array<any>>([miniLocationsStart]);
+
+
+  const [activitiesModalIsVisible, setActivitiesModalIsVisible] = useState(false);
+  const [newActModalIsVisible, setNewActModalVisible] = useState(false);
+  const [userSignModalIsVisible, setUserSignModalVisible] = useState(false);
+
+  const mapRef = useRef<any>();
+
+  const mapNavigation = useNavigation();
+
+  const [errorMsg, setErrorMsg] = useState<string>();
   const [location, setLocation] = useState<any>({
     latitude: 31.0461,
     longitude: 34.8516,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
     });
-  const [errorMsg, setErrorMsg] = useState<string>();
+  
+  
 
+  const props = {
+    activitiesModalIsVisible: activitiesModalIsVisible,
+    setActivitiesModal: setActivitiesModalIsVisible,
+    newActModalIsVisible: newActModalIsVisible,
+    setNewActModalVisible: setNewActModalVisible,
+    userSignModalIsVisible:userSignModalIsVisible,
+    setUserSignModalVisible:setUserSignModalVisible,
+    userToken:token,
+    setUserToken: setToken,
+  }
+
+
+  
+  const testC = () => {
+    console.log("testC pressed");
+
+   }
+
+   console.log("1token1");
+
+  
+
+  
+
+  const headers = {
+    "Accept":"application/json, text/plain, /","Content-Type": "multipart/form-data",
+  };
+
+
+
+  const fetchEvents = async () => {
+    console.log("get events")
+
+    const response = await axios.get('https://backend-scne.onrender.com/events', { headers }).catch((err) => {
+      console.log("err")
+      console.log(err)
+    }) as AxiosResponse<any, any>;
+
+    console.log("get events res")
+    console.log(response.data[response.data.length-1])
+    setMiniLocations(response.data);
+    console.log(miniLocations[0])
+    console.log("end res")
+  }
+
+
+
+   useEffect(() => {
+    console.log("end res")
+  }
+  , []);
+
+
+  
+  
+
+  
 
   useEffect(() => {//get user location
+    
     (async () => {
       
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -233,17 +367,17 @@ export default function Index(navigation: any) {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      let miniLocation ={
-        latitude: location["coords"]["latitude"],
-        longitude: location["coords"]["longitude"],
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }
-      setLocation(location["coords"]);
-      console.log(location["coords"]["latitude"]);
-      console.log(deviceHeight)
+      setLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0222,
+        longitudeDelta: 0.0121,
+      });
+    
+
+    
     })();
-  }, []);
+  }, [location]);
 
   let text = 'Waiting..';
   if (errorMsg) {
@@ -254,38 +388,88 @@ export default function Index(navigation: any) {
 
   }
 
+    const addNewEvent = () => {
+      console.log("add new event");
+      axios.post('https://backend-scne.onrender.com/events', {
+        title: "event 1",
+        date:'date 1',
+        user_id:1,
+        description: "this is event 1",
+        lata: '32.060930',
+        longa: '34.767084',
+      })
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
 
-    const mapRef = useRef<any>();
-    const mapNavigation = useNavigation();
+    }
 
     const findeMeClicked = () => () => {
-      mapRef.current.animateToRegion(location, 1000);
+      console.log("set location");
+
+
+      console.log(token);
+      mapRef.current.animateToRegion(location, 1000);      
+   
+      
     };
+
+
+    const [userProfileNav, setUserProfileNav] = useState("/UserProfile");
+
+    let tokenString=token
 
     useEffect(() => {
 
       
+       //if user is not logged in show sighin modal
+     if(token==null){
+      console.log(token)
+      console.log("user has no token saved and is not a loggedin user")
 
+
+      console.log("use3");
+
+      setUserSignModalVisible(true)
+      setUserProfileNav("/Login")
+    }
+
+    
       mapNavigation.setOptions({
+
+
 
         header : () => (
           <View style={styles.profileButtons}> 
-           <Link href="/UserProfile" style={styles.profileButton}>
+          {!token &&
+            <Link 
+            href={{
+              pathname: "/Login",
+              params: {token}
+           }} style={styles.profileButton}>
             <View style={styles.profileButtonImg}>
             <Image source={require('../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
             </View>
             </Link>
+          }
+          {token &&
             <Link href="/UserProfile" style={styles.profileButton}>
-            
+            <View style={styles.profileButtonImg}>
+            <Image source={require('../assets/icons/profile_image.png')} style={styles.highButtonImg}/>
+            </View>
             </Link>
-            <Link href="/UserProfile" style={styles.profileButton}>
-            
-            </Link>
-            <Link href="/UserProfile" style={styles.profileButton}>
-            
+          }
+            <Link href="/" style={[styles.profileButton, styles.highlightedButton]}>
+            <Image source={require('../assets/icons/map_icon.png')} style={styles.highButtonImg}/>
             </Link>
            
-           <Link href="/UserProfile" style={styles.profileButton}>
+           <Link href={{
+              pathname: "/components/ContactsPage",
+              params: {data: "sms"}
+           }} style={styles.profileButton}>
             <View style={styles.profileButtonImg}>
             <Image source={require('../assets/icons/conversation_icon.png')} style={styles.highButtonImg}/>
             </View>
@@ -295,33 +479,52 @@ export default function Index(navigation: any) {
         
       });
     }
-    , []);
+    , [token]);
 
         
 
-    const [modalVisible, setModalVisible] = useState(false);
-    console.log(typeof setModalVisible);
-
     const modalPress = () => {
-      console.log("modal pressed");
-      console.log(modalVisible);
-      setModalVisible(false);
-      console.log(modalVisible);
+      console.log("modal pressed1");
+      console.log(token)
+      setNewActModalVisible(true);
+
     }
 
-    const closeModal = () => {
-      console.log("close");
-      setModalVisible(false); 
+    const activitiesPressed = () => {
+      console.log("activities pressed");
+      setActivitiesModalIsVisible(true);
+
     }
 
-    const props = {
-      isVisible: modalVisible,
-      setIsVisible: setModalVisible,
+    const markerPressed = () => {
+      console.log("marker pressed");
     }
 
+    const testB = () => {
+      console.log("testB pressed");
+    }
+
+
+  
+    console.log("props");
+    console.log(props);
+
+
+    
+
+    
 
   return (
+      
+      
     <View style={styles.container}>
+       <UserContextComponent props={props}/>
+
+      <NewActModal props={props}/>
+      <ActivitiesModal props={props}/>
+      <UserSignModal props={props}/>
+
+
       <MapView 
       style={styles.map}
       provider={PROVIDER_GOOGLE}
@@ -331,28 +534,66 @@ export default function Index(navigation: any) {
       customMapStyle={custom_map_style}
       
       >
-        <Marker coordinate={location}>
-          <Image source={require('../assets/icons/man_icon.png')} style={styles.markerImg}/>
+
+        <Marker
+        coordinate={location}
+        title={"title"}
+        description={"description"}
+        onPress={markerPressed}
+        >
+
+        <Image source={require('../assets/icons/man_icon.png')} style={styles.markerImg}/>
+
         </Marker>
+
+
+    
+
+        {
+          miniLocations.map((marker:any, index:any) => (
+            console.log("marker"),
+            console.log(marker[5]),
+            console.log(marker[6]),
+            console.log("end marker"),
+
+            
+
+            <Marker
+              key={index}
+              coordinate={{ latitude: marker[5]? marker[5]:0, longitude: marker[6]? marker[6]:0}}
+              title={marker.title}
+              description={marker.description}
+              onPress={markerPressed}
+            />
+          )
+          )
+        }
+
+
       </MapView>
 
-
+      {/* end of the map elemnt
+      start of the buttons and app functionality
+      
+      */}
+      <View style={styles.appFunctionality}>
       <View style={styles.sideButtons}>
         <TouchableOpacity onPress={findeMeClicked()} style={styles.sideButtonsButton}>
           <View style={styles.sideButtonsButtonImg}>
             <Image source={require('../assets/icons/location_icon.png')} style={styles.sideButtonImg}/>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={findeMeClicked()} style={styles.sideButtonsButton}>
+        <TouchableOpacity onPress={testC} style={styles.sideButtonsButton}>
           <View style={styles.sideButtonsButtonImg}>
             <Image source={require('../assets/icons/info_icon.png')} style={styles.sideButtonImg}/>
           </View>
         </TouchableOpacity>
 
+
         </View>
       
       <View style={styles.lowerButtons}>
-        <TouchableOpacity style={styles.lowerButton}>
+        <TouchableOpacity  onPress={testB}style={styles.lowerButton}>
         <View style={styles.lowerButtonImg}>
             <Image source={require('../assets/icons/activity_icon.png')} style={styles.imgContainer}/>
           </View>
@@ -364,7 +605,7 @@ export default function Index(navigation: any) {
           </View>
        
         </TouchableOpacity>
-        <TouchableOpacity style={styles.lowerButton}>
+        <TouchableOpacity onPress={activitiesPressed} style={styles.lowerButton}>
         <View style={styles.lowerButtonImg}>
             <Image source={require('../assets/icons/activity_icon.png')} style={styles.imgContainer}/>
           </View>
@@ -372,6 +613,7 @@ export default function Index(navigation: any) {
         </TouchableOpacity>
 
         </View>
+    </View>
     </View>
   );
 }
@@ -409,13 +651,22 @@ const styles = StyleSheet.create({
   },
 
   sideButtons:{
-    backgroundColor:'lightgreen',
-    position: 'absolute',
     width: 65,
     height: 150,
-    top: 844-300,
-    right: 15,
+  
     borderRadius: 40,
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+
+  appFunctionality:{
+    position: 'absolute',
+    width: '100%',
+    height: '50%',
+    bottom: 0,
     display: 'flex',
     justifyContent: 'space-around',
     alignContent: 'center',
@@ -438,12 +689,9 @@ const styles = StyleSheet.create({
 
   lowerButtons:{
     backgroundColor: 'white',
-    position: 'absolute',
     width: '90%',
-    left: '5%',
     opacity: 0.9,
     height: 80,
-    top: deviceHeight-130,
     borderRadius: 20,
     display: 'flex',
     justifyContent: 'space-around',
@@ -500,7 +748,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.9,
     shadowRadius: 7,
-
   },
 
   lowerButtonMid:{
@@ -524,17 +771,28 @@ const styles = StyleSheet.create({
   },
 
   highButtonImg:{
+    padding: 0,
     resizeMode: 'contain',
     height: 50,
     width: 50,
-    borderWidth: 2,
+    borderWidth: 20,
     borderColor: "transparent",
     display: 'flex',
     alignContent: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 100,
     backgroundColor: 'white',
+
+  },
+
+  highlightedButton:{
+    borderWidth: 2,
+    borderColor: "lightgreen",
+    shadowColor: 'gray',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.9,
+    shadowRadius: 7,
 
   },
 

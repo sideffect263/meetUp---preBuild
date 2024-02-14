@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, Image} from 'react-native';
+import {Alert, Modal, StyleSheet, Text, Pressable, View} from 'react-native';
 
 
 
-const NewActModal = ({props}: {props: any} ) => {
+const ActivitiesModal = ({props}: {props: any} ) => {
 
-  const isVisible = props.newActModalIsVisible;
-  const setIsVisible = props.setNewActModalVisible;
+  const isVisible = props.activitiesModalIsVisible;
+  const setIsVisible = props.setActivitiesModal;
 
 
     const closeModal = () => {
@@ -18,37 +18,20 @@ const NewActModal = ({props}: {props: any} ) => {
     
       <Modal
         animationType="slide"
-        onLayout={()=>console.log("layout")}
         transparent={true}
         visible={isVisible}
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
           setIsVisible(!isVisible);
         }}>
-
-
-
-        <View style={styles.centeredView}>{/*this is the container for the modal*/}
-          <View style={styles.modalView}>{/*this is the container for the modal*/}
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Hello World!</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={closeModal}>
-                
-             <Image 
-              source={require('../../assets/icons/close_icon.png')}
-              style={styles.buttonCloseImage}
-              />
-              
-
-
+              <Text style={styles.textStyle}>Hide Modal</Text>
             </Pressable>
-
-            <View style={styles.modalContent}>
-
-              
-
-              </View>
-
           </View>
         </View>
       </Modal>
@@ -65,8 +48,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width:'100%',
-    
-    height:'30%',
+    height:'70%',
 
     margin: 0,
     backgroundColor: 'white',
@@ -82,16 +64,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
-  modalContent:{
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center',
-    borderWidth: 1,
-  },
-
-
   button: {
     borderRadius: 20,
     padding: 10,
@@ -102,14 +74,6 @@ const styles = StyleSheet.create({
   },
   buttonClose: {
     backgroundColor: '#2196F3',
-    top: -70,
-    borderRadius: 100,
-  },
-
-  buttonCloseImage:{
-    resizeMode: 'contain',
-    width: 35,
-    height: 35,
   },
   textStyle: {
     color: 'white',
@@ -122,4 +86,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewActModal;
+export default ActivitiesModal;

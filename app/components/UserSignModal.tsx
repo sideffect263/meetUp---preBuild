@@ -3,10 +3,10 @@ import {Alert, Modal, StyleSheet, Text, Pressable, View, Image} from 'react-nati
 
 
 
-const NewActModal = ({props}: {props: any} ) => {
+const UserSignModal = ({props}: {props: any} ) => {
 
-  const isVisible = props.newActModalIsVisible;
-  const setIsVisible = props.setNewActModalVisible;
+  const isVisible = props.userSignModalIsVisible;
+  const setIsVisible = props.setUserSignModalVisible;
 
 
     const closeModal = () => {
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   modalView: {
     width:'100%',
     
-    height:'30%',
+    height:'60%',
 
     margin: 0,
     backgroundColor: 'white',
@@ -122,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewActModal;
+export default UserSignModal;
